@@ -1,0 +1,145 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create wordpress environment
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/26
+
+  PublicSubnetCidr:
+    Type: String
+    Default: 10.0.0.0/28
+
+  DatabaseSubnetACidr:
+    Type: String
+    Default: 10.0.0.16/28
+
+  DatabaseSubnetCCidr:
+    Type: String
+    Default: 10.0.0.32/28
+
+  TagKey:
+    Type: String
+    Default: Environment
+
+  TagValue:
+    Type: String
+    Default: Production
+
+Resources:
+  # VPC
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
+ 
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref Vpc
+
+  # Subnet
+  WordPressSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref PublicSubnetCidr
+      AvailabilityZone: ap-northeast-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress-a
+
+  DatabaseSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref DatabaseSubnetACidr
+      AvailabilityZone: ap-northeast-1a
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: Database-a
+
+  DatabaseSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref DatabaseSubnetCCidr
+      AvailabilityZone: ap-northeast-1c
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: Database-c
+
+  # RouteTable
+  WordPressRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
+
+  WordPressRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref WordPressRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  WordPressRouteTableAccociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref WordPressRouteTable
+      SubnetId: !Ref WordPressSubnet
+
+  DatabaseRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: Database
+
+  DatabaseRouteTableAccociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref DatabaseRouteTable
+      SubnetId: !Ref DatabaseSubnetA
+
+  DatabaseRouteTableAccociationC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref DatabaseRouteTable
+      SubnetId: !Ref DatabaseSubnetC
+
