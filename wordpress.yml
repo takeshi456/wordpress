@@ -270,6 +270,29 @@ Resources:
           Value: !Ref TagValue
         - Key: Name
           Value: WordPress
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            LOG=/var/log/user-data.log
+            touch $LOG
+            exec >> $LOG 2>&1
+                yum update -y
+                yum install -y docker git
+                systemctl enable docker
+                usermod -aG docker ec2-user
+                curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                chmod +x /usr/local/bin/docker-compose
+                mkdir $BASEDIR
+                cd $BASEDIR
+                BASEDIR=/opt/wordpress
+                export DBHOST=${DBHOST}
+                export DBPASSWD=${DBPASSWD}
+                curl -L https://github.com/tuimac/wordpress/docker/docker-compose.yaml -o docker-compose.yaml
+          - {
+              DBHOST: !GetAtt WordPressDB.Endpoint.Address,
+              DBPASSWD: !Ref DBMasterUserPassword
+            }
 
   # Elastic IP
   WordPressEIP:
