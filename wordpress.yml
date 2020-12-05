@@ -288,7 +288,8 @@ Resources:
                 BASEDIR=/opt/wordpress
                 export DBHOST=${DBHOST}
                 export DBPASSWD=${DBPASSWD}
-                curl -L https://github.com/tuimac/wordpress/docker/docker-compose.yaml -o docker-compose.yaml
+                curl -L https://raw.githubusercontent.com/tuimac/wordpress/main/docker/docker-compose.yaml -o docker-compose.yaml
+                docker-compose up -d
           - {
               DBHOST: !GetAtt WordPressDB.Endpoint.Address,
               DBPASSWD: !Ref DBMasterUserPassword
