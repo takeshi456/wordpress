@@ -210,6 +210,28 @@ Resources:
         - Key: Name
           Value: Database
 
+  # RDS
+  Type: AWS::RDS::DBSubnetGroup
+  Properties:
+    DBSubnetGroupDescription: For WordPress Database
+    SubnetIds:
+      - !Ref DatabaseSubnetA
+      - !Ref DatabaseSubnetC
+    Tags:
+      - Key: !Ref TagKey
+        Value: !Ref TagValue
+      - Key: Name
+        Value: WordPress
+
+  Type: AWS::RDS::DBInstance
+  Properties:
+    AllocatedStorage: 20
+    AllowMajorVersionUpgrade: true
+    AutoMinorVersionUpgrade: true
+    AvailabilityZone: ap-northeast-1a
+
+
+
   # EC2 Instance
   WordPress:
     Type: AWS::EC2::Instance
@@ -237,20 +259,3 @@ Resources:
     Properties:
       InstanceId: !Ref WordPress
 	
-  # RDS
-  Type: AWS::RDS::DBSubnetGroup
-  Properties:
-    DBSubnetGroupDescription: For WordPress Database
-    SubnetIds:
-      - !Ref DatabaseSubnetA
-      - !Ref DatabaseSubnetC
-    Tags:
-      - Key: !Ref TagKey
-        Value: !Ref TagValue
-      - Key: Name
-        Value: WordPress
-
-  Type: AWS::RDS::DBInstance
-  Properties:
-
-
