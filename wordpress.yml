@@ -22,13 +22,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
 
-  WordPressInstanceType:
+  DBMasterUserPassword:
     Type: String
-    Default: t2.micro
-
-  DatabaseInstanceType:
-    Type: String
-    Default: 
+    Description: You have to chage Default Value below.
+    Default: password
 
   SSH_PEM_Filename:
     Type: String
@@ -211,33 +208,54 @@ Resources:
           Value: Database
 
   # RDS
-  Type: AWS::RDS::DBSubnetGroup
-  Properties:
-    DBSubnetGroupDescription: For WordPress Database
-    SubnetIds:
-      - !Ref DatabaseSubnetA
-      - !Ref DatabaseSubnetC
-    Tags:
-      - Key: !Ref TagKey
-        Value: !Ref TagValue
-      - Key: Name
-        Value: WordPress
+  WordPressDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: For WordPress Database
+      SubnetIds:
+        - !Ref DatabaseSubnetA
+        - !Ref DatabaseSubnetC
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
 
-  Type: AWS::RDS::DBInstance
-  Properties:
-    AllocatedStorage: 20
-    AllowMajorVersionUpgrade: true
-    AutoMinorVersionUpgrade: true
-    AvailabilityZone: ap-northeast-1a
-
-
+  WordPressDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: mysql
+      EngineVersion: 5.7.31
+      DBInstanceIdentifier: wordpress
+      MasterUsername: wordpress-adimn
+      MasterUserPassword: !Ref DBMasterUserPassword
+      DBInstanceClass: db.t2.micro
+      StorageType: gp2
+      AllocatedStorage: 20
+      AvailabilityZone: ap-northeast-1a
+      DBSubnetGroupName: !Ref WordPressDBSubnetGroup
+      PubliclyAccessible: false
+      DBSecurityGroups: !Ref DatabaseSecurityGroup
+      MultiAZ: false
+      Port: 3306
+      DBName: wordpress
+      BackupRetentionPeriod: 1
+      PreferredBackupWindow: 18:00-19:00
+      CopyTagsToSnapshot: true
+      AutoMinorVersionUpgrade: true
+      PreferredMaintenanceWindow: Sat:17:30-Sat:18:30
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
 
   # EC2 Instance
   WordPress:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref AMIID
-      InstanceType: !Ref WordPressInstanceType
+      InstanceType: t2.micro
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeleteOnTermination: true
@@ -258,4 +276,3 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref WordPress
-	
