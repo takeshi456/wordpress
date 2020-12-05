@@ -18,6 +18,22 @@ Parameters:
     Type: String
     Default: 10.0.0.32/28
 
+  AMIID:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+  WordPressInstanceType:
+    Type: String
+    Default: t2.micro
+
+  DatabaseInstanceType:
+    Type: String
+    Default: 
+
+  SSH_PEM_Filename:
+    Type: String
+    Default: tuimac
+
   TagKey:
     Type: String
     Default: Environment
@@ -64,7 +80,7 @@ Resources:
       VpcId: !Ref Vpc
       CidrBlock: !Ref PublicSubnetCidr
       AvailabilityZone: ap-northeast-1a
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -142,4 +158,99 @@ Resources:
     Properties:
       RouteTableId: !Ref DatabaseRouteTable
       SubnetId: !Ref DatabaseSubnetC
+
+  # Security Group
+  WordPressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: WordPress
+      GroupDescription: WordPress Firewall
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Inbound HTTP from ANY
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: Inbound HTTPS from ANY
+      SecurityGroupEgress:
+        - IpProtocol: udp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 10.0.0.2/32
+          Description: 
+        - IpProtocol: -1
+          CidrIp: 10.0.0.0/64
+          Description: 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: Database
+      GroupDescription: Database Firewall
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WordPressSecurityGroup
+          Description: Inbound ODBC from WordPress Container Server
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: Database
+
+  # EC2 Instance
+  WordPress:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AMIID
+      InstanceType: !Ref WordPressInstanceType
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          Description: WordPress Instance Primary ENI
+          PrivateIpAddresses:
+            - Primary: true
+          Groups: !Ref WordPressSecurityGroup
+          SubnetId: !Ref WordPressSubnet
+      KeyName: !Ref SSH_PEM_Filename
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
+
+  # Elastic IP
+  WordPressEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref WordPress
+	
+  # RDS
+  Type: AWS::RDS::DBSubnetGroup
+  Properties:
+    DBSubnetGroupDescription: For WordPress Database
+    SubnetIds:
+      - !Ref DatabaseSubnetA
+      - !Ref DatabaseSubnetC
+    Tags:
+      - Key: !Ref TagKey
+        Value: !Ref TagValue
+      - Key: Name
+        Value: WordPress
+
+  Type: AWS::RDS::DBInstance
+  Properties:
+
 
