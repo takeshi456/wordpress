@@ -256,8 +256,6 @@ Resources:
         - AssociatePublicIpAddress: true
           DeleteOnTermination: true
           Description: WordPress Instance Primary ENI
-          PrivateIpAddresses:
-            - Primary: true
           GroupSet:
             - !Ref WordPressSecurityGroup
           SubnetId: !Ref WordPressSubnet
