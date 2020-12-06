@@ -12,4 +12,4 @@ services:
       WORDPRESS_DB_PASSWORD: $DBPASSWD
       WORDPRESS_DB_NAME: wordpress
     volumes:
-      - wordpress:/var/www/html
+      - ./wordpress:/var/www/html
