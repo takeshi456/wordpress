@@ -27,7 +27,7 @@ Parameters:
     Description: You have to chage Default Value below.
     Default: password
 
-  SSH_PEM_Filename:
+  SSHPemFilename:
     Type: String
     Default: tuimac
 
@@ -175,14 +175,9 @@ Resources:
           CidrIp: 0.0.0.0/0
           Description: Inbound HTTPS from ANY
       SecurityGroupEgress:
-        - IpProtocol: udp
-          FromPort: 53
-          ToPort: 53
-          CidrIp: 10.0.0.2/32
-          Description: 
         - IpProtocol: -1
-          CidrIp: 10.0.0.0/64
-          Description: 
+          CidrIp: !Ref VpcCidr
+          Description: Outboud traffic from this host to WordPress VPC range
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -227,7 +222,7 @@ Resources:
       Engine: mysql
       EngineVersion: 5.7.31
       DBInstanceIdentifier: wordpress
-      MasterUsername: wordpress-adimn
+      MasterUsername: adimn
       MasterUserPassword: !Ref DBMasterUserPassword
       DBInstanceClass: db.t2.micro
       StorageType: gp2
@@ -235,12 +230,13 @@ Resources:
       AvailabilityZone: ap-northeast-1a
       DBSubnetGroupName: !Ref WordPressDBSubnetGroup
       PubliclyAccessible: false
-      DBSecurityGroups: !Ref DatabaseSecurityGroup
+      VPCSecurityGroups: 
+        - !Ref DatabaseSecurityGroup
       MultiAZ: false
       Port: 3306
       DBName: wordpress
       BackupRetentionPeriod: 1
-      PreferredBackupWindow: 18:00-19:00
+      PreferredBackupWindow: 18:30-19:30
       CopyTagsToSnapshot: true
       AutoMinorVersionUpgrade: true
       PreferredMaintenanceWindow: Sat:17:30-Sat:18:30
@@ -262,9 +258,10 @@ Resources:
           Description: WordPress Instance Primary ENI
           PrivateIpAddresses:
             - Primary: true
-          Groups: !Ref WordPressSecurityGroup
+          GroupSet:
+            - !Ref WordPressSecurityGroup
           SubnetId: !Ref WordPressSubnet
-      KeyName: !Ref SSH_PEM_Filename
+      KeyName: !Ref SSHPemFilename
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
