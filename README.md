@@ -15,7 +15,7 @@ Just execute AWS CLI below
 ```
 aws cloudformation create-stack --stack-name wordpress --region ap-northeast-1 --template-body file://wordpress.yml
 ```
-It takes 
+It takes about 10 minutes to complete.
 After that, access to EC2 instance's Public IP address port 80.
 
 ## Author
@@ -26,5 +26,6 @@ If you have some opinion and find bugs, please post [here](https://github.com/tu
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Future Plan
+- Write down actual monthly price of this environment
 - Create backup and restore data automation tool
 - Create notification for increacing price
