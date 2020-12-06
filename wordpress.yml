@@ -250,7 +250,7 @@ Resources:
       Engine: mysql
       EngineVersion: 5.7.31
       DBInstanceIdentifier: wordpress
-      MasterUsername: adimn
+      MasterUsername: admin
       MasterUserPassword: !Ref DBMasterUserPassword
       DBInstanceClass: db.t2.micro
       StorageType: gp2
