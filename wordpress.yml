@@ -202,6 +202,24 @@ Resources:
         - Key: Name
           Value: Database
 
+  # Endpoint
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument: '{
+        "Version": "2012-10-17",
+        "Statement":[{
+          "Effect": "Allow",
+          "Principal": "*",
+          "Action": "*",
+          "Resource": "*"
+        }]
+      }'
+      RouteTableIds:
+        - !Ref WordPressSubnet
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref Vpc
+
   # RDS
   WordPressDBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
@@ -240,6 +258,7 @@ Resources:
       CopyTagsToSnapshot: true
       AutoMinorVersionUpgrade: true
       PreferredMaintenanceWindow: Sat:17:30-Sat:18:30
+      DeleteAutomatedBackups: true
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
