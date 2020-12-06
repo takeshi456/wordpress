@@ -216,9 +216,14 @@ Resources:
         }]
       }'
       RouteTableIds:
-        - !Ref WordPressSubnet
+        - !Ref WordPressRouteTable
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcId: !Ref Vpc
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
 
   # RDS
   WordPressDBSubnetGroup:
@@ -316,3 +321,8 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref WordPress
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: Name
+          Value: WordPress
