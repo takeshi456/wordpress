@@ -6,7 +6,8 @@ I consider the portability of system so I choose to boot WordPress on Docker.([D
 Check below envirionment.
 - Create AWS Account.([Guide](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/?nc1=h_ls))
 - Install AWS CLI on your machine.([Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html))
-- Create IAM User or IAM Role for executing AWS CLI.([IAM user Creation Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html), [IAM role Creation Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html)).
+- Create IAM User or IAM Role for executing AWS CLI.([IAM user Creation Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html), [IAM role Creation Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html))
+
 You only need to attach 'AWSCloudFormationFullAccess' which is AWS managed IAM policy to IAM role or user you created.
 
 ## How to use
